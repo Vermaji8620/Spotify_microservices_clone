@@ -58,3 +58,64 @@ export const addAlbum = trycatch(
 
     }
 )
+
+export const addSong = trycatch(
+    async (req: authenticatedRequest, res) => {
+        if (req.user?.role !== 'admin') {
+            res.status(403).json({
+                message: "You are not the admin"
+            })
+            return;
+        }
+        const { title, description, album_id } = req.body;
+        if (!title || !description) {
+            res.status(400).json({
+                message: "Please input all the details"
+            })
+            return;
+        }
+
+        const isAlbum = await sql`
+            SELECT * FROM albums WHERE id=${album_id}
+        `
+
+        if (!isAlbum || isAlbum.length == 0) {
+            // 404 stands for not found 
+            res.status(404).json({
+                message: "No album with this Id"
+            })
+            return;
+        }
+
+        const audio = req.file;
+        if (!audio) {
+            res.status(400).json({
+                message: "No file to upload"
+            })
+            return;
+        }
+
+        const fileBuffer = getBuffer(audio)
+
+        if (!fileBuffer || !fileBuffer.content) {
+            // 500 means the issue is in backend 
+            res.status(500).json({
+                message: "Failed to generate file buffer"
+            })
+            return;
+        }
+
+        const cloud = await cloudinary.v2.uploader.upload(fileBuffer.content, {
+            folder: "songs",
+            resource_type: "video"
+        });
+
+        const result = await sql`
+            INSERT INTO songs (title, description, audio, album_id) VALUES (${title}, ${description}, ${cloud.secure_url}, ${album_id})
+        `
+        res.status(201).json({
+            message: "Song added"
+        })
+    }
+)
+
