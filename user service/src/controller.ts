@@ -56,4 +56,3 @@ export const myprofile = trycatch(async (req: AuthenticatedRequest, res) => {
     const user = req.user
     res.json(user)
 })
-

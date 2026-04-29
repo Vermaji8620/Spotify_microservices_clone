@@ -5,7 +5,7 @@ import userRoutes from "./route.js"
 
 
 dotenv.config()
-const connectDB = async()=>{
+const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI as string);
         console.log("connected")
