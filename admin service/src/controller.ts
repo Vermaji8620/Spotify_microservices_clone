@@ -206,3 +206,32 @@ export const deleteAlbum = trycatch(
 
     }
 )
+
+export const deleteSong = trycatch(
+    async (req: authenticatedRequest, res) => {
+        if (req.user?.role !== 'admin') {
+            res.status(401).json({
+                message: "You are not the admin"
+            })
+            return;
+        }
+
+        const song_id = req.params.id;
+        const findSongId = await sql`SELECT * FROM songs WHERE id= ${song_id}`
+
+        if (!findSongId || findSongId.length == 0) {
+            res.status(404).json({
+                message: "No such song exists"
+            })
+            return;
+        }
+
+        await sql`
+            DELETE FROM songs WHERE id = ${song_id}
+        `
+
+        res.status(200).json({
+            message: "Song deleted successfully"
+        })
+    }
+)
