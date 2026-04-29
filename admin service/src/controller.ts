@@ -119,3 +119,53 @@ export const addSong = trycatch(
     }
 )
 
+export const addThumbnail = trycatch(
+    async (req: authenticatedRequest, res: Response) => {
+        if (req.user?.role !== 'admin') {
+            res.status(401).json({
+                message: "You are not admin"
+            })
+            return;
+        }
+
+        const song = await sql`
+            SELECT * FROM songs WHERE id=${req.params.id}
+        `
+
+        if (!song || song.length == 0) {
+            res.status(404).json({
+                message: "No song with this ID"
+            });
+            return;
+        }
+
+        const file = req.file;
+        if (!file) {
+            res.status(400).json({
+                message: "No file to upload"
+            })
+            return;
+        }
+
+        const fileBuffer = getBuffer(file)
+
+        if (!fileBuffer || !fileBuffer.content) {
+            // 500 means the issue is in backend 
+            res.status(500).json({
+                message: "Failed to generate file buffer"
+            })
+            return;
+        }
+
+        const cloud = await cloudinary.v2.uploader.upload(fileBuffer.content);
+
+        const result = await sql`
+            UPDATE songs SET thumbnail = ${cloud.secure_url} WHERE id = ${req.params.id} RETURNING *
+        `
+
+        res.status(200).json({
+            message: "thumbnail added",
+            song: result[0]
+        })
+    }
+)
