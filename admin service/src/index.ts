@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import { sql } from './config/db.js'
 import redis from "redis"
 import cloudinary from 'cloudinary'
+import cors from "cors"
 
 export const redisClient = redis.createClient({
     password: process.env.Redis_Password as string,
@@ -19,6 +20,7 @@ redisClient.connect().then(() => {
 
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 dotenv.config()

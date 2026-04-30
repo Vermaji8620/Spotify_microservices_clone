@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import redis from "redis"
 import songRoutes from "./route.js"
+import cors from "cors"
 
 
 export const redisClient = redis.createClient({
@@ -18,6 +19,8 @@ redisClient.connect().then(() => {
 
 const app = express()
 dotenv.config()
+app.use(cors())
+app.use(express.json())
 
 app.use("/api/v1", songRoutes)
 
