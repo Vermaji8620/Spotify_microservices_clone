@@ -27,7 +27,9 @@ interface SongContextType {
     setLoading: (value: boolean) => void,
     selectedSong: string | null,
     setSelectedSong: (id: string) => void,
-    albums: Album[]
+    albums: Album[],
+    fetchSingleSong: () => Promise<void>, // yaha pe promise use kiya as a data type kyunki async await wala function hai na,. baki me promise ka use nai kiya hai, kyunki, wo normal function k jaise behave krta hai 
+    song: Song | null,
 }
 
 // createContext prop drilling k bajaye use kiya jata hai.. jaise agar prop drilling krenge, to pura ka pura parent->children1->children2->children3 pe jana hoga.... to instead, hm context ka use krenge, taki pura ka pura <App/> koi v chiz ko use kr paye....
@@ -45,6 +47,7 @@ export const SongProvider = ({ children }: SongProviderProps) => {
     const [songs, setSongs] = useState<Song[]>([])
     const [selectedSong, setSelectedSong] = useState<string | null>(null)
     const [albums, setAlbums] = useState<Album[]>([])
+    const [song, setSong] = useState<Song | null>(null)
 
 
     // usecallback function is used for caching and memoization, so if there are no changes in its dependencies, then it renders the cached or memoized results.
@@ -63,6 +66,18 @@ export const SongProvider = ({ children }: SongProviderProps) => {
         }
     }, []);
 
+    const fetchSingleSong = useCallback(async () => {
+        if (!selectedSong) {
+            return;
+        }
+        try {
+            const { data } = await axios.get(`${server}/api/v1/song/${selectedSong}`)
+            setSong(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [selectedSong])
+
     const fetchAlbums = useCallback(async () => {
         try {
             const { data } = await axios.get<Album[]>(`${server}/api/v1/album/all`)
@@ -78,7 +93,7 @@ export const SongProvider = ({ children }: SongProviderProps) => {
     }, [])
 
     // yaha pe box ko fill up krrhe hai, jo v chiz chahiye hoga, pure k pure app me...
-    return (<SongContext.Provider value={{ songs, selectedSong, setSelectedSong, isPlaying, setIsPlaying, loading, setLoading, albums }}>{children}</SongContext.Provider>)
+    return (<SongContext.Provider value={{ songs, selectedSong, setSelectedSong, isPlaying, setIsPlaying, loading, setLoading, albums, fetchSingleSong, song }}>{children}</SongContext.Provider>)
 }
 
 export const useSongData = (): SongContextType => {
