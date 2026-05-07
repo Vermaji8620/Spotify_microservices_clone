@@ -105,8 +105,8 @@ export const SongProvider = ({ children }: SongProviderProps) => {
     const fetchAlbums = useCallback(async () => {
         setLoading(true)
         try {
-            const { data } = await axios.get<Album[]>(`${server}/api/v1/album/all`)
-            setAlbums(data)
+            const { data } = await axios.get<Album[]>(`${server}/api/v1/album/all`);
+            setAlbums(data);
         } catch (error) {
             console.log(error)
         }

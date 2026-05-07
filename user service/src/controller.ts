@@ -52,7 +52,43 @@ export const loginUser = trycatch(async (req, res) => {
 
 })
 
-export const myprofile = trycatch(async (req: AuthenticatedRequest, res) => {
+export const myProfile = trycatch(async (req: AuthenticatedRequest, res) => {
     const user = req.user
     res.json(user)
 })
+
+
+export const addToPlaylist = trycatch(
+    async (req: AuthenticatedRequest, res) => {
+        const user_id = req?.user?._id;
+        const user = await User.findById(user_id)
+        if (!user) {
+            res.status(404).json({
+                message: "No user with this Id"
+            })
+            return;
+        }
+
+        const song_id = req?.params?.id?.toString();
+        if (song_id && user?.playlist?.includes(song_id)) {
+            const index = user.playlist.indexOf(song_id);
+            user.playlist.splice(index, 1);
+
+            await user.save();
+            res.status(200).json({
+                message: "Removed from Playlist"
+            })
+            return;
+        }
+
+        if (song_id)
+            user.playlist.push(song_id);
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Added to Playlist"
+        })
+
+    }
+)

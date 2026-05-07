@@ -19,7 +19,8 @@ interface UserContextType {
     btnLoading: boolean,
     loginUser: (email: string, password: string, navigate: (path: string) => void) => Promise<void>,
     logoutUser: () => void,
-    registerUser: (email: string, password: string, name: string, navigate: (path: string) => void) => Promise<void>
+    registerUser: (email: string, password: string, name: string, navigate: (path: string) => void) => Promise<void>,
+    addToPlaylist: (id: string) => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -39,6 +40,21 @@ export const UserProvider = ({ children }: UserProvidedProps) => {
         setUser(null);
         setIsAuth(false);
         toast.success("Logout successful");
+    }
+
+    async function addToPlaylist(id: string) {
+        try {
+            const { data } = await axios.post(`${server}/api/v1/song/${id}`, {}, {
+                headers: {
+                    "token": localStorage.getItem("token"),
+                }
+            });
+            toast.success(data.message);
+            fetchUser();
+        }
+        catch (error: any) {
+            toast.error(error?.response?.data?.message || "An error occurred");
+        }
     }
 
     async function loginUser(email: string, password: string, navigate: (path: string) => void) {
@@ -97,7 +113,7 @@ export const UserProvider = ({ children }: UserProvidedProps) => {
         fetchUser();
     }, [])
 
-    return <UserContext.Provider value={{ user, loading, isAuth, btnLoading, loginUser, logoutUser, registerUser }}>
+    return <UserContext.Provider value={{ user, loading, isAuth, btnLoading, loginUser, logoutUser, registerUser, addToPlaylist }}>
         {children}
         <Toaster />
     </UserContext.Provider>
