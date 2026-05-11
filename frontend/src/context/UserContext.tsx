@@ -82,7 +82,7 @@ export const UserProvider = ({ children }: UserProvidedProps) => {
             localStorage.setItem('token', data.token);
             setUser(data.user);
             setIsAuth(true);
-            navigate('/')
+            navigate('/');
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "An error occurred");
         }
