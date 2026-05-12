@@ -32,6 +32,8 @@ interface SongContextType {
     song: Song | null,
     nextSong: () => void,
     previousSong: () => void
+    fetchSongs: () => void
+    fetchAlbums: () => void
     fetchAlbumSongs: (id: string) => Promise<void>
     albumSong: Song[]
     albumData: Album | null
@@ -139,7 +141,7 @@ export const SongProvider = ({ children }: SongProviderProps) => {
     }, [fetchSongs, fetchAlbums])
 
     // yaha pe box ko fill up krrhe hai, jo v chiz chahiye hoga, pure k pure app me...
-    return (<SongContext.Provider value={{ songs, selectedSong, setSelectedSong, isPlaying, setIsPlaying, loading, setLoading, albums, fetchSingleSong, song, previousSong, nextSong, fetchAlbumSongs, albumSong, albumData }}>{children}</SongContext.Provider>)
+    return (<SongContext.Provider value={{ fetchSongs, fetchAlbums, songs, selectedSong, setSelectedSong, isPlaying, setIsPlaying, loading, setLoading, albums, fetchSingleSong, song, previousSong, nextSong, fetchAlbumSongs, albumSong, albumData }}>{children}</SongContext.Provider>)
 }
 
 export const useSongData = (): SongContextType => {
